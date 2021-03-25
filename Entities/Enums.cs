@@ -12,9 +12,10 @@ namespace Bank
     enum BankManagementOptions 
     {
         [Description("Listar Contas")] ListAccounts = 1,
-        [Description("Inserir Nova Conta")] InsertAccount = 2,
-        [Description("Deletar Conta")] DeleteAccount = 3,
-        [Description("Sair")] Exit = 4
+        [Description("Criar Conta")] InsertAccount = 2,
+        [Description("Encerrar Conta")] DeleteAccount = 3,
+        [Description("Acessar Conta")] AccessAccount = 4,
+        [Description("Sair")] Exit = 5
     }
     enum AccountManagementOptions
     {
@@ -24,7 +25,6 @@ namespace Bank
         [Description("Depositar")] Deposit = 4,
         [Description("Sair")] Exit = 5
     }
-
     static class EnumsUtils
     {
         public static string GetDescription<T>(this T enumerationValue)
