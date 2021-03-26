@@ -3,133 +3,104 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Bank.Controlers;
 
 namespace Bank
 {
     class Program
     {
+
         static void Main(string[] args)
         {
+            BankAccount CurrentAcc = null;
+            Bank CurrentBank = null;
             List<Bank> Bancos = new List<Bank> { new Bank("DIO International Bank"),
-                                                 new Bank("Santander"), 
+                                                 new Bank("Santander"),
                                                  new Bank("Banco do Brasil") };
             Bancos[0].BankAcounts.Add(new BankAccount("Victor Hugo", 1500.50, 500, AccountType.LegalPerson));
-            string strInput = "";
-            int choosenBankId = int.MinValue;
-            do
-            {
-                if (strInput == "")
-                    showBankOptMenu(Bancos);
-                do
-                {                    
-                    if (choosenBankId == int.MinValue)
+
+            /* Account Management Menu Criation */
+            EnumMenu AccManagementMenu = new EnumMenu(
+                typeof(AccountManagementOptions),
+                ipt =>
                     {
-                        strInput = Console.ReadLine();
-                        int.TryParse(strInput, out choosenBankId);
-                    }    
-                    else
+                    switch (Enum.Parse(typeof(AccountManagementOptions), ipt))
                     {
-                        strInput = Console.ReadLine();
-                        Console.WriteLine("Opção inválida");
-                        showBankOptMenu(Bancos);
-                        int.TryParse(strInput, out choosenBankId);
-                    }
-                } while (strInput != "x" && choosenBankId <= 0 && Bancos.Count() > choosenBankId);
-                if (strInput != "x")
+                        case AccountManagementOptions.GetBalance:
+                            Console.WriteLine("Seu saldo é R${0}", CurrentAcc.Balance);
+                            break;
+                        case AccountManagementOptions.Deposit:
+                            Console.WriteLine("Digite o Valor do deposito");
+                            CurrentAcc.Deposit(double.Parse(Console.ReadLine()));
+                            break;
+                        case AccountManagementOptions.Transfer:
+                            Console.WriteLine("Digite o Valor da tranferencia");
+                            double tranferValue = double.Parse(Console.ReadLine());
+                            Console.WriteLine("Digite o numero da conta do Destinatário");
+                            string accNumber = Console.ReadLine();
+                            BankAccount Favorecido = CurrentBank.BankAcounts.Find(x => x.AccountNumber == accNumber);
+                            CurrentAcc.Transfer(tranferValue, ref Favorecido);
+                            CurrentBank.BankAcounts[CurrentBank.BankAcounts.FindIndex(x => x.AccountNumber == accNumber)] = Favorecido;
+                            break;
+                            case AccountManagementOptions.Withdraw:
+                                Console.WriteLine("Digite o Valor do saque");
+                                CurrentAcc.Withdraw(double.Parse(Console.ReadLine()));
+                                break;
+                        }
+                    },
+                "5"
+            );
+
+            /* Bank Management Menu Criation */
+            EnumMenu BankManagementMenu = new EnumMenu(
+                typeof(BankManagementOptions),
+                ipt =>
                 {
-                    Bank choosenBank = Bancos[choosenBankId - 1];
-                    Console.WriteLine("Selectione a Opcao");
-                    Console.WriteLine(EnumsUtils.GetEnumAsOptList(typeof(BankManagementOptions)));
-                    int bankAccessOpt = 0;
-                    do
-                    {
-                        if (bankAccessOpt == 0)
-                        {
-                            strInput = Console.ReadLine();
-                            int.TryParse(strInput, out bankAccessOpt);
-                        }
-                        else
-                        {
-                            strInput = Console.ReadLine();
-                            Console.WriteLine("Opção inválida");
-                            Console.WriteLine("Selectione a Opcao");
-                            Console.WriteLine(EnumsUtils.GetEnumAsOptList(typeof(BankManagementOptions)));
-                            int.TryParse(strInput, out bankAccessOpt);
-                        }
-                    } while (!Enum.IsDefined(typeof(BankManagementOptions), bankAccessOpt));
-                    switch ((BankManagementOptions)bankAccessOpt)
+                    switch (Enum.Parse(typeof(BankManagementOptions), ipt))
                     {
                         case BankManagementOptions.AccessAccount:
                             string accountKey = null;
                             Console.WriteLine("Digite o numero da conta ou precione 'x' para sair");
-                            do 
+                            do
                             {
                                 if (accountKey == null)
                                     accountKey = Console.ReadLine();
-                                else 
+                                else
                                 {
-                                    Console.WriteLine("Conta Não encontrada\n Favor digite novamente o numero da conta");
+                                    Console.WriteLine("Conta Não encontrada\n Favor digite novamente o numero da conta ou precione 'x' para sair");
                                     accountKey = Console.ReadLine();
                                 }
-                            }while(accountKey!= "x" && choosenBank.BankAcounts.FindIndex(x => x.AccountNumber.ToString() == accountKey) != 1);
-                            if (choosenBank.BankAcounts.FindIndex(x => x.AccountNumber.ToString() == accountKey) != 1) 
+                            } while (accountKey != "x" && CurrentBank.BankAcounts.FindIndex(x => x.AccountNumber.ToString() == accountKey) == 1);
+                            if (accountKey != "x")
                             {
-                                BankAccount bankAccount = choosenBank.BankAcounts.Find(x => x.AccountNumber.ToString() == accountKey);
-                                Console.WriteLine("Selectione a Opcao");
-                                Console.WriteLine(EnumsUtils.GetEnumAsOptList(typeof(AccountManagementOptions)));
-                                string accountOpt = null;
-                                do
-                                {
-                                    if (accountOpt == null)
-                                    {
-                                        accountOpt = Console.ReadLine();
-                                    }
-                                    else
-                                    {
-                                        accountOpt = Console.ReadLine();
-                                        Console.WriteLine("Opção inválida");
-                                        Console.WriteLine("Selectione a Opcao");
-                                        Console.WriteLine(EnumsUtils.GetEnumAsOptList(typeof(AccountManagementOptions)));
-                                    }
-                                } while (!accountOpt.Any(x => !char.IsDigit(x)) && !Enum.IsDefined(typeof(AccountManagementOptions), int.Parse(accountOpt)));
-                                switch ((AccountManagementOptions)int.Parse(accountOpt)) 
-                                {
-                                    case AccountManagementOptions.GetBalance:
-                                        Console.WriteLine("Seu saldo é R${0}",bankAccount.Balance);
-                                        break;
-                                    case AccountManagementOptions.Deposit:
-                                        Console.WriteLine("Digite o Valor do deposito");
-                                        bankAccount.Deposit(double.Parse(Console.ReadLine()));
-                                        break;
-                                    case AccountManagementOptions.Transfer:
-                                        Console.WriteLine("Digite o Valor da tranferencia");
-                                        bankAccount.Deposit(double.Parse(Console.ReadLine()));
-                                        break;
-                                    case AccountManagementOptions.Withdraw:
-                                        Console.WriteLine("Digite o Valor do saque");
-                                        bankAccount.Deposit(double.Parse(Console.ReadLine()));
-                                        break;
-                                    case AccountManagementOptions.Exit:
-                                        break;
-                                }
+                                CurrentAcc = CurrentBank.BankAcounts.Find(x => x.AccountNumber.ToString() == accountKey);
+                                /* Display Account Management Menu  */
+                                AccManagementMenu.InstanceMenu();
                             }
                             break;
                         case BankManagementOptions.DeleteAccount:
-                            choosenBank.RemoveAccount();
+                            CurrentBank.RemoveAccount();
                             break;
                         case BankManagementOptions.InsertAccount:
-                            choosenBank.AddNewAccount();
+                            CurrentBank.AddNewAccount();
                             break;
                         case BankManagementOptions.ListAccounts:
-                            Console.WriteLine( choosenBank.BankAcounts.ToString());
-                            break;
-                        case BankManagementOptions.Exit:
-
+                            Console.WriteLine(CurrentBank.BankAcounts.ToString());
                             break;
                     }
-                }
-            } while (strInput != "x");
-            
+                },
+                "5"
+            );
+
+            new DynamicMenu(
+                new Dictionary<string,string> (Bancos.Select((x,index) => new KeyValuePair<string, string>(index.ToString(),x.Name))),
+                ipt => 
+                   {
+                       CurrentBank = Bancos[int.Parse(ipt)];
+                       BankManagementMenu.InstanceMenu();
+                   },
+                   "x"
+             ).InstanceMenu();    
         }
         static void showBankOptMenu(List<Bank> Bancos) {
             Console.WriteLine("Selecione seu Banco");

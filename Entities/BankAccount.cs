@@ -16,12 +16,13 @@ namespace Bank
             this.Credit = credit;
             this.AccountOwnerName = costumerName;
             this.Type = accType;
+            this.AccountNumber = this.GetHashCode().ToString();
         }
         public string AccountOwnerName { get; private set; }
         public double Balance { get; private set; }
         public double Credit { get; private set; }
         public AccountType Type { get; private set; }
-        public long AccountNumber { get { return this.GetHashCode(); } }
+        public string AccountNumber { get; private set; }
         public bool Withdraw(double value) 
         {
             if (this.Credit + this.Balance >= value) {

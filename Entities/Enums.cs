@@ -15,7 +15,6 @@ namespace Bank
         [Description("Criar Conta")] InsertAccount = 2,
         [Description("Encerrar Conta")] DeleteAccount = 3,
         [Description("Acessar Conta")] AccessAccount = 4,
-        [Description("Sair")] Exit = 5
     }
     enum AccountManagementOptions
     {
@@ -23,7 +22,6 @@ namespace Bank
         [Description("Tranferir")] Transfer = 2,
         [Description("Sacar")] Withdraw = 3,
         [Description("Depositar")] Deposit = 4,
-        [Description("Sair")] Exit = 5
     }
     static class EnumsUtils
     {
